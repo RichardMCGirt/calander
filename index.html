@@ -3,31 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Airtable-Integrated Calendars</title>
+    <title>Google Calendar Style</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Company Event Calendars</h1>
 
-    <div id="calendars-container">
-        <!-- Calendars will be dynamically generated here -->
-    </div>
+    <header>
+        <h1>Google Calendar Style Event Management</h1>
+    </header>
 
-    <!-- Modal for Adding/Edit Events -->
+    <main>
+        <div id="calendar-grid"></div>
+    </main>
+
+    <!-- Modal for Event Details -->
     <div id="event-modal" class="modal">
         <div class="modal-content">
-            <span class="close-btn" onclick="closeModal()">&times;</span>
-            <h2 id="modal-title">Add Event</h2>
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2 id="modal-title">Event Details</h2>
+            <p><strong>Title:</strong> <span id="event-title"></span></p>
+            <p><strong>Start:</strong> <span id="event-start"></span></p>
+            <p><strong>End:</strong> <span id="event-end"></span></p>
+            <p><strong>Description:</strong> <span id="event-description"></span></p>
+            <button class="edit-btn" onclick="editEvent()">Edit</button>
+            <button class="delete-btn" onclick="deleteEvent()">Delete</button>
+        </div>
+    </div>
+
+    <!-- Modal for Adding/Editing Events -->
+    <div id="add-edit-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeAddEditModal()">&times;</span>
+            <h2 id="add-edit-title">Add Event</h2>
             <input type="hidden" id="event-id">
-            <input type="hidden" id="selected-calendar">
-            <label>Event Title:</label>
-            <input type="text" id="event-title">
-            <label>Start Date:</label>
-            <input type="datetime-local" id="event-start">
-            <label>End Date:</label>
-            <input type="datetime-local" id="event-end">
-            <label>Description:</label>
-            <textarea id="event-description"></textarea>
+            <input type="text" id="event-title-input" placeholder="Event Title">
+            <input type="datetime-local" id="event-start-input">
+            <input type="datetime-local" id="event-end-input">
+            <textarea id="event-description-input" placeholder="Event Description"></textarea>
             <button onclick="saveEvent()">Save</button>
         </div>
     </div>
