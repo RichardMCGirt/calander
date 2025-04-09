@@ -54,6 +54,45 @@
       font-style: italic;
       color: green;
     }
+
+    #calendar {
+      margin-top: 2rem;
+      background: white;
+      padding: 1rem;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      max-width: 1000px;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      vertical-align: top;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+
+    td {
+      height: 100px;
+    }
+
+    .event {
+      background-color: #007BFF;
+      color: white;
+      padding: 2px 4px;
+      border-radius: 3px;
+      font-size: 0.85rem;
+      margin-top: 2px;
+      display: block;
+    }
   </style>
 </head>
 <body>
@@ -75,6 +114,19 @@
     <div id="log"></div>
   </div>
 
+  <div id="calendar" style="display: none;">
+    <h2>Delegated Calendar - April 2025</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th>
+          <th>Thu</th><th>Fri</th><th>Sat</th>
+        </tr>
+      </thead>
+      <tbody id="calendarBody"></tbody>
+    </table>
+  </div>
+
   <script>
     const workers = [
       { id: 'w1', name: 'Diana Smith' },
@@ -83,11 +135,32 @@
       { id: 'w4', name: 'Richard McGirt' }
     ];
 
+    // Unique events per worker for April 2025
+    const eventsByWorker = {
+      w1: [
+        { date: '2025-04-03', title: 'Interior Inspection' },
+        { date: '2025-04-12', title: 'Walkthrough - Lot 24' }
+      ],
+      w2: [
+        { date: '2025-04-05', title: 'Roofing Coordination' },
+        { date: '2025-04-15', title: 'Meeting w/ Vendor' }
+      ],
+      w3: [
+        { date: '2025-04-08', title: 'Punch List Review' },
+        { date: '2025-04-21', title: 'Drywall Check' }
+      ],
+      w4: [
+        { date: '2025-04-10', title: 'Client Call' },
+        { date: '2025-04-20', title: 'Exterior Paint Review' }
+      ]
+    };
+
     const sickWorkerSelect = document.getElementById('sickWorker');
     const replacementWorkerSelect = document.getElementById('replacementWorker');
     const log = document.getElementById('log');
+    const calendar = document.getElementById('calendar');
+    const calendarBody = document.getElementById('calendarBody');
 
-    // Populate dropdowns
     function populateDropdowns() {
       workers.forEach(worker => {
         const option1 = new Option(worker.name, worker.id);
@@ -97,7 +170,6 @@
       });
     }
 
-    // Delegation logic
     function delegateCalendar() {
       const sickId = sickWorkerSelect.value;
       const replacementId = replacementWorkerSelect.value;
@@ -105,24 +177,79 @@
       if (!sickId || !replacementId) {
         log.style.color = "red";
         log.textContent = "Please select both workers.";
+        calendar.style.display = "none";
         return;
       }
 
       if (sickId === replacementId) {
         log.style.color = "red";
         log.textContent = "Cannot assign calendar to the same worker.";
+        calendar.style.display = "none";
         return;
       }
 
       const sickName = workers.find(w => w.id === sickId).name;
       const replacementName = workers.find(w => w.id === replacementId).name;
 
-      // Simulate API or DB update
       log.style.color = "green";
       log.textContent = `✅ ${replacementName} now has access to ${sickName}'s calendar.`;
+
+      const sickEvents = eventsByWorker[sickId] || [];
+      const replacementEvents = eventsByWorker[replacementId] || [];
+
+      const combined = [...sickEvents.map(e => ({ ...e, title: `${sickName}: ${e.title}` })), 
+                        ...replacementEvents.map(e => ({ ...e, title: `${replacementName}: ${e.title}` }))];
+
+      renderCalendar(combined);
     }
 
-    // Initialize
+    function renderCalendar(events) {
+      calendarBody.innerHTML = "";
+
+      const daysInApril = 30;
+      const startDayOfWeek = new Date('2025-04-01').getDay();
+      let currentDay = 1;
+      let row = "<tr>";
+
+      for (let i = 0; i < startDayOfWeek; i++) {
+        row += "<td></td>";
+      }
+
+      for (let i = startDayOfWeek; i < 7; i++) {
+        row += `<td>${createDayCell(currentDay, events)}</td>`;
+        currentDay++;
+      }
+
+      row += "</tr>";
+      calendarBody.innerHTML += row;
+
+      while (currentDay <= daysInApril) {
+        row = "<tr>";
+        for (let i = 0; i < 7; i++) {
+          if (currentDay <= daysInApril) {
+            row += `<td>${createDayCell(currentDay, events)}</td>`;
+            currentDay++;
+          } else {
+            row += "<td></td>";
+          }
+        }
+        row += "</tr>";
+        calendarBody.innerHTML += row;
+      }
+
+      calendar.style.display = "block";
+    }
+
+    function createDayCell(day, events) {
+      const dateStr = `2025-04-${day.toString().padStart(2, '0')}`;
+      const dayEvents = events.filter(e => e.date === dateStr);
+      let cell = `<strong>${day}</strong>`;
+      dayEvents.forEach(ev => {
+        cell += `<span class="event">${ev.title}</span>`;
+      });
+      return cell;
+    }
+
     populateDropdowns();
   </script>
 
